@@ -72,6 +72,7 @@ LLAMA_SRCS_CPP := \
 	llama.cpp/src/models/chatglm.cpp \
 	llama.cpp/src/models/clef.cpp \
 	llama.cpp/src/models/clip.cpp \
+	llama.cpp/src/models/clover-moe.cpp \
 	llama.cpp/src/models/codeshell.cpp \
 	llama.cpp/src/models/cogvlm.cpp \
 	llama.cpp/src/models/cohere2.cpp \
@@ -120,9 +121,11 @@ LLAMA_SRCS_CPP := \
 	llama.cpp/src/models/granite.cpp \
 	llama.cpp/src/models/granite-swa.cpp \
 	llama.cpp/src/models/k2-horizon.cpp \
+	llama.cpp/src/models/kimi-k31.cpp \
 	llama.cpp/src/models/kolibri1.cpp \
 	llama.cpp/src/models/lfm-base.cpp \
 	llama.cpp/src/models/lfm3.cpp \
+	llama.cpp/src/models/limite.cpp \
 	llama.cpp/src/models/maion-coder.cpp \
 	llama.cpp/src/models/mamba-base.cpp \
 	llama.cpp/src/models/grok.cpp \
@@ -154,12 +157,14 @@ LLAMA_SRCS_CPP := \
 	llama.cpp/src/models/mamba2.cpp \
 	llama.cpp/src/models/maple.cpp \
 	llama.cpp/src/models/mellum.cpp \
+	llama.cpp/src/models/metis16.cpp \
 	llama.cpp/src/models/mimo2.cpp \
 	llama.cpp/src/models/minicpm.cpp \
 	llama.cpp/src/models/minicpm3.cpp \
 	llama.cpp/src/models/minimax-01.cpp \
 	llama.cpp/src/models/minimax-m2.cpp \
 	llama.cpp/src/models/minimax-m3.cpp \
+	llama.cpp/src/models/mistral-large4.cpp \
 	llama.cpp/src/models/mistral3.cpp \
 	llama.cpp/src/models/mistral4.cpp \
 	llama.cpp/src/models/modern-bert.cpp \
@@ -203,6 +208,7 @@ LLAMA_SRCS_CPP := \
 	llama.cpp/src/models/qwen3vlmoe.cpp \
 	llama.cpp/src/models/qwen4exp.cpp \
 	llama.cpp/src/models/refact.cpp \
+	llama.cpp/src/models/ricursive.cpp \
 	llama.cpp/src/models/rnd1.cpp \
 	llama.cpp/src/models/rwkv6-base.cpp \
 	llama.cpp/src/models/rwkv6.cpp \
@@ -223,6 +229,7 @@ LLAMA_SRCS_CPP := \
 	llama.cpp/src/models/talkie.cpp \
 	llama.cpp/src/models/vllm-decision2.cpp \
 	llama.cpp/src/models/wavtokenizer-dec.cpp \
+	llama.cpp/src/models/xing4-0.cpp \
 	llama.cpp/src/models/xverse.cpp \
 	llama.cpp/src/llama-adapter.cpp \
 	llama.cpp/src/llama-arch.cpp \
@@ -268,6 +275,7 @@ COMMON_SRCS_CPP := \
 	llama.cpp/common/chat-auto-parser-helpers.cpp \
 	llama.cpp/common/chat-diff-analyzer.cpp \
 	llama.cpp/common/chat-peg-parser.cpp \
+	llama.cpp/common/chat-tts-norm.cpp \
 	llama.cpp/common/chat.cpp \
 	llama.cpp/common/common.cpp \
 	llama.cpp/common/console.cpp \
@@ -368,12 +376,16 @@ o/$(MODE)/llama.cpp/llama.cpp.a: $(LLAMA_CPP_OBJS)
 # ==============================================================================
 
 MTMD_SRCS_CPP := \
-	llama.cpp/tools/mtmd/clip.cpp \
+	llama.cpp/tools/mtmd/mtmd-graph.cpp \
+	llama.cpp/tools/mtmd/mtmd-model.cpp \
+	llama.cpp/tools/mtmd/mtmd-subcontext.cpp \
 	llama.cpp/tools/mtmd/mtmd.cpp \
 	llama.cpp/tools/mtmd/mtmd-helper.cpp \
 	llama.cpp/tools/mtmd/mtmd-helper-gen.cpp \
 	llama.cpp/tools/mtmd/mtmd-audio.cpp \
 	llama.cpp/tools/mtmd/mtmd-image.cpp \
+	llama.cpp/tools/mtmd/models/chatterbox-gen.cpp \
+	llama.cpp/tools/mtmd/models/chatterbox-spkenc.cpp \
 	llama.cpp/tools/mtmd/models/cogvlm.cpp \
 	llama.cpp/tools/mtmd/models/deepseekocr.cpp \
 	llama.cpp/tools/mtmd/models/deepseekocr2.cpp \
@@ -381,6 +393,7 @@ MTMD_SRCS_CPP := \
 	llama.cpp/tools/mtmd/models/conformer.cpp \
 	llama.cpp/tools/mtmd/models/dotsocr.cpp \
 	llama.cpp/tools/mtmd/models/dots3note.cpp \
+	llama.cpp/tools/mtmd/models/drama3-gen.cpp \
 	llama.cpp/tools/mtmd/models/exaone4_5.cpp \
 	llama.cpp/tools/mtmd/models/gemma4a.cpp \
 	llama.cpp/tools/mtmd/models/gemma4ua.cpp \
@@ -399,6 +412,7 @@ MTMD_SRCS_CPP := \
 	llama.cpp/tools/mtmd/models/ling3vl.cpp \
 	llama.cpp/tools/mtmd/models/llama4.cpp \
 	llama.cpp/tools/mtmd/models/llava.cpp \
+	llama.cpp/tools/mtmd/models/magevl.cpp \
 	llama.cpp/tools/mtmd/models/mimo-audio.cpp \
 	llama.cpp/tools/mtmd/models/mimovl.cpp \
 	llama.cpp/tools/mtmd/models/minicpmv.cpp \
@@ -407,6 +421,7 @@ MTMD_SRCS_CPP := \
 	llama.cpp/tools/mtmd/models/muse-glimmer.cpp \
 	llama.cpp/tools/mtmd/models/muse-spark-audio.cpp \
 	llama.cpp/tools/mtmd/models/nemotron-omni.cpp \
+	llama.cpp/tools/mtmd/models/nemotron-transcribe.cpp \
 	llama.cpp/tools/mtmd/models/nemotron-v2-vl.cpp \
 	llama.cpp/tools/mtmd/models/paddleocr.cpp \
 	llama.cpp/tools/mtmd/models/parakeet.cpp \

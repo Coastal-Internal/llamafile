@@ -1,0 +1,11 @@
+diff --git a/ggml/src/ggml-cuda/fp8.cu b/ggml/src/ggml-cuda/fp8.cu
+--- a/llama.cpp/ggml/src/ggml-cuda/fp8.cu
++++ b/llama.cpp/ggml/src/ggml-cuda/fp8.cu
+@@ -1,6 +1,6 @@
+ #include "fp8.cuh"
+ 
+-#if !defined(GGML_USE_HIP) && !defined(GGML_USE_MUSA) && CUDART_VERSION >= 11080
++#if !defined(GGML_USE_HIP) && !defined(GGML_USE_MUSA) && CUDART_VERSION >= 11080 && !defined(GGML_USE_TINYBLAS)
+ 
+ struct fp8_abs_src {
+     const float * x;

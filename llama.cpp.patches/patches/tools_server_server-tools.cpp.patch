@@ -12,7 +12,7 @@ diff --git a/tools/server/server-tools.cpp b/tools/server/server-tools.cpp
  namespace fs = std::filesystem;
  
  //
-@@ -1283,6 +1287,13 @@ struct server_tool_exec_shell_command : server_tool {
+@@ -1284,6 +1288,13 @@ struct server_tool_exec_shell_command : server_tool {
          std::vector<std::string> args = !json_value(params, "runtime", std::string()).empty()
              ? std::vector<std::string>{"sh", "-c", command}
              : std::vector<std::string>{"cmd", "/c", command};
@@ -26,7 +26,7 @@ diff --git a/tools/server/server-tools.cpp b/tools/server/server-tools.cpp
  #else
          std::vector<std::string> args = {"sh", "-c", command};
  #endif
-@@ -1728,6 +1739,11 @@ struct server_tool_get_info : server_tool {
+@@ -1729,6 +1740,11 @@ struct server_tool_get_info : server_tool {
          std::vector<std::string> args = !json_value(params, "runtime", std::string()).empty()
              ? std::vector<std::string>{"uname", "-a"}
              : std::vector<std::string>{"cmd", "/c", "ver"};

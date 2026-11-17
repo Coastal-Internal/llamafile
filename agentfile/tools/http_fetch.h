@@ -118,7 +118,7 @@ struct HttpFetchTool : server_tool {
         return origin + dir + loc;
     }
 
-    json invoke(json params, server_tool::stream *) const override {
+    json invoke(json params, server_tool::stream *, const std::function<bool()> &) const override {
         if (!params.contains("url")) {
             return {{"error", "missing required parameter: url"}};
         }

@@ -223,7 +223,7 @@ if "%NO_IQ_QUANTS%"=="1"  set "COMMON_FLAGS=%COMMON_FLAGS% -DGGML_CUDA_NO_IQ_QUA
 :: sync with FA_TYPES / FA_DEFAULT_COMBINATIONS in llamafile/build-functions.sh.
 :: (The informational GGML_CUDA_FA_QUANTS string macro is #ifdef-guarded and is
 :: not set here, to avoid quoting it through cmd.)
-set "FA_TYPES=Q4_0 Q4_1 Q5_0 Q5_1 Q8_0 BF16 F16"
+set "FA_TYPES=Q4_0 Q4_1 Q5_0 Q5_1 Q8_0 BF16 F16 F8_E4M3"
 if "%FA_ALL_QUANTS%"=="1" (
     set "FA_COMBINATIONS="
     for %%v in (%FA_TYPES%) do for %%k in (%FA_TYPES%) do call set "FA_COMBINATIONS=%%FA_COMBINATIONS%% %%k-%%v"

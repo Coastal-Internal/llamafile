@@ -112,7 +112,7 @@ setup_build_dir() {
 # The K-V types fattn.cu knows about, and the combinations compiled by default.
 # Both mirror ggml/CMakeLists.txt's GGML_CUDA_FA_QUANTS default and the FA_TYPES
 # list in ggml/cmake/common.cmake -- keep in sync on a llama.cpp bump.
-FA_TYPES="q4_0 q4_1 q5_0 q5_1 q8_0 bf16 f16"
+FA_TYPES="q4_0 q4_1 q5_0 q5_1 q8_0 bf16 f16 f8_e4m3"
 FA_DEFAULT_COMBINATIONS="q4_0-q4_0 q8_0-q8_0 f16-f16 bf16-bf16"
 
 collect_gpu_sources() {

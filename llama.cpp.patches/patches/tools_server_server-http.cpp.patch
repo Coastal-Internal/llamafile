@@ -1,7 +1,7 @@
 diff --git a/tools/server/server-http.cpp b/tools/server/server-http.cpp
 --- a/llama.cpp/tools/server/server-http.cpp
 +++ b/llama.cpp/tools/server/server-http.cpp
-@@ -159,7 +159,7 @@ bool server_http_context::init(const common_params & params) {
+@@ -245,7 +245,7 @@ bool server_http_context::init(const common_params & params) {
  bool server_http_context::init_listener(const common_params & params) {
      auto & srv = pimpl->servers.back();
  
@@ -10,7 +10,7 @@ diff --git a/tools/server/server-http.cpp b/tools/server/server-http.cpp
      if (!params.ssl_file_key.empty() && !params.ssl_file_cert.empty()) {
          SRV_TRC("running with SSL: key = %s, cert = %s\n", params.ssl_file_key.c_str(), params.ssl_file_cert.c_str());
          srv = std::make_unique<httplib::SSLServer>(
-@@ -491,7 +491,11 @@ self.addEventListener('activate', (e) => e.waitUntil((async () => {
+@@ -606,7 +606,11 @@ self.addEventListener('activate', (e) => e.waitUntil((async () => {
      return true;
  }
  
@@ -23,7 +23,7 @@ diff --git a/tools/server/server-http.cpp b/tools/server/server-http.cpp
      // Bind and listen
  
      listening_addresses.clear();
-@@ -524,6 +528,15 @@ bool server_http_context::start() {
+@@ -639,6 +643,15 @@ bool server_http_context::start() {
                                                : string_format("%s://%s:%d", is_ssl ? "https" : "http", common_http_format_host(host).c_str(), port));
      }
  

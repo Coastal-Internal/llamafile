@@ -20,52 +20,26 @@ diff --git a/ggml/src/ggml-cpu/ops.cpp b/ggml/src/ggml-cpu/ops.cpp
  // ggml_compute_forward_dup
  
  static void ggml_compute_forward_dup_same_cont(
-@@ -8897,6 +8909,15 @@ static void ggml_compute_forward_flash_attn_ext_f16_one_chunk(
+@@ -8807,6 +8819,15 @@ static void ggml_compute_forward_flash_attn_ext_f16_one_chunk(
      GGML_ASSERT((                            q_to_vec_dot) && "fattn: unsupported K-type");
      GGML_ASSERT((v->type == GGML_TYPE_F32 || v_to_float  ) && "fattn: unsupported V-type");
  
 +#if GGML_USE_LLAMAFILE
-+    // [jart] llamafile #975: see file-scope extern "C" declarations of
-+    // llamafile_fa_vec_dot_f16 / llamafile_fa_fp16_to_fp32_row above.
-+    // Their multi-arch implementations live in llamafile/fa_helpers_*
-+    // and are runtime-dispatched via llamafile/sgemm.cpp.
++    // [jart] llamafile #975: see file-scope extern "C" declaration of
++    // llamafile_fa_vec_dot_f16 above. Its multi-arch implementations live
++    // in llamafile/fa_helpers_* and are runtime-dispatched via
++    // llamafile/sgemm.cpp. (The f32 VKQ accumulator #975 also added here is
++    // upstream since v1.0.0, which accumulates in f32 unconditionally.)
 +    const bool kq_is_f16 = (k->type == GGML_TYPE_F16 && k_vec_dot_type == GGML_TYPE_F16);
-+    const bool v_is_f16  = (v->type == GGML_TYPE_F16);
 +#endif
 +
      int ith = params->ith;
  
      for (int ir = ir0; ir < ir1; ++ir) {
-@@ -8916,10 +8937,22 @@ static void ggml_compute_forward_flash_attn_ext_f16_one_chunk(
-         ggml_fp16_t * VKQ16 = (ggml_fp16_t *) (VKQ32 + 1*DV); // (temporary) FP16 VKQ accumulator
-         ggml_fp16_t * Q_q   = (ggml_fp16_t *) (VKQ32 + 2*DV); // (temporary) buffer for Q converted to quantized/FP16
- 
--        if (v->type == GGML_TYPE_F16) {
--            memset(VKQ16, 0, DV*sizeof(ggml_fp16_t));
--        } else {
-+        // [jart] llamafile #975: when V is f16 and the hardware lacks
-+        // native f16 FMA, accumulate VKQ in f32 instead of f16. The f16
-+        // accumulator path round-trips f16<->f32 every KV iteration via
-+        // _mm512_cvtph_ps / _mm512_cvtps_ph (see simd-mappings.h
-+        // GGML_F32Cx16_*), dominating the FA inner loop on Xeon Gold /
-+        // Skylake-X / Ice Lake / Zen 4 without AVX-512-FP16. Hardware
-+        // with native f16 FMA keeps the existing fast path.
-+#if defined(__AVX512FP16__) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) || defined(__riscv_zvfh)
-+        const bool use_f32_accum = (v->type != GGML_TYPE_F16);
-+#else
-+        const bool use_f32_accum = true;
-+#endif
-+        if (use_f32_accum) {
-             memset(VKQ32, 0, DV*sizeof(float));
-+        } else {
-+            memset(VKQ16, 0, DV*sizeof(ggml_fp16_t));
-         }
- 
-         const ggml_fp16_t * mp = mask ? (ggml_fp16_t *)((char *) mask->data + iq1*mask->nb[1] + (iq2%mask->ne[2])*mask->nb[2] + (iq3%mask->ne[3])*mask->nb[3]) : NULL;
-@@ -8948,7 +8981,13 @@ static void ggml_compute_forward_flash_attn_ext_f16_one_chunk(
+@@ -8860,7 +8881,13 @@ static void ggml_compute_forward_flash_attn_ext_f16_one_chunk(
              float s; // KQ value
  
-             const char * k_data = (const char *) k->data + ( ic*nbk1 + ik2*nbk2 + ik3*nbk3);
+             const char * k_data = (const char *) k->data + (ik1*nbk1 + ik2*nbk2 + ik3*nbk3);
 +#if GGML_USE_LLAMAFILE
 +            if (!kq_is_f16 || !llamafile_fa_vec_dot_f16(DK, &s, k_data, Q_q)) {
 +                kq_vec_dot(DK, &s, 0, k_data, 0, Q_q, 0, 1);
@@ -76,78 +50,8 @@ diff --git a/ggml/src/ggml-cpu/ops.cpp b/ggml/src/ggml-cpu/ops.cpp
  
              s = s*scale; // scale KQ value
  
-@@ -8965,21 +9004,36 @@ static void ggml_compute_forward_flash_attn_ext_f16_one_chunk(
- 
-             const char * v_data = ((const char *) v->data + (ic*nbv1 + iv2*nbv2 + iv3*nbv3));
- 
--            if (v->type == GGML_TYPE_F16) {
-+            if (use_f32_accum) {
-                 if (s > M) {
-                     // s is new maximum, ms < 1.0f, vs == expf(s - s) == 1.0f
-                     M = s;
-                     ms = expf(Mold - M);
- 
-                     // V = V*expf(Mold - M)
--                    ggml_vec_scale_f16(DV, VKQ16, ms);
-+                    ggml_vec_scale_f32(DV, VKQ32, ms);
-                 } else {
-                     // no new maximum, ms == 1.0f, vs != 1.0f
-                     vs = expf(s - M);
-                 }
- 
-                 // V += v*expf(s - M)
--                ggml_vec_mad_f16(DV, VKQ16, (const ggml_fp16_t *) v_data, vs);
-+                if (v_to_float) {
-+                    // f16/quant -> f32 (covers GGML_TYPE_F16 too once
-+                    // we're in the f32 accumulator path; v_to_float is
-+                    // ggml_fp16_to_fp32_row for V=f16)
-+#if GGML_USE_LLAMAFILE
-+                    if (!v_is_f16 || !llamafile_fa_fp16_to_fp32_row(v_data, V32, DV)) {
-+                        v_to_float(v_data, V32, DV);
-+                    }
-+#else
-+                    v_to_float(v_data, V32, DV);
-+#endif
-+                    ggml_vec_mad_f32(DV, VKQ32, V32, vs);
-+                } else {
-+                    // V is F32
-+                    ggml_vec_mad_f32(DV, VKQ32, (const float *) v_data, vs);
-+                }
-             } else {
-                 if (s > M) {
-                     // s is new maximum, ms < 1.0f, vs == expf(s - s) == 1.0f
-@@ -8987,26 +9041,20 @@ static void ggml_compute_forward_flash_attn_ext_f16_one_chunk(
-                     ms = expf(Mold - M);
- 
-                     // V = V*expf(Mold - M)
--                    ggml_vec_scale_f32(DV, VKQ32, ms);
-+                    ggml_vec_scale_f16(DV, VKQ16, ms);
-                 } else {
-                     // no new maximum, ms == 1.0f, vs != 1.0f
-                     vs = expf(s - M);
-                 }
- 
-                 // V += v*expf(s - M)
--                if (v_to_float) {
--                    v_to_float(v_data, V32, DV);
--                    ggml_vec_mad_f32(DV, VKQ32, V32, vs);
--                } else {
--                    // V is F32
--                    ggml_vec_mad_f32(DV, VKQ32, (const float *) v_data, vs);
--                }
-+                ggml_vec_mad_f16(DV, VKQ16, (const ggml_fp16_t *) v_data, vs);
-             }
- 
-             S = S*ms + vs; // scale and increment sum with partial sum
-         }
- 
--        if (v->type == GGML_TYPE_F16) {
-+        if (!use_f32_accum) {
-             for (int64_t d = 0; d < DV; ++d) {
-                 VKQ32[d] = GGML_CPU_FP16_TO_FP32(VKQ16[d]);
-             }
-@@ -9227,8 +9275,24 @@ static void ggml_compute_forward_flash_attn_ext_tiled(
-                 const char * k_data = (const char *)k->data + (ic + tk)*nbk1 + ik2*nbk2 + ik3*nbk3;
+@@ -9126,8 +9153,24 @@ static void ggml_compute_forward_flash_attn_ext_tiled(
+                 const char * k_data = (const char *)k->data + kv_row(ic + tk)*nbk1 + ik2*nbk2 + ik3*nbk3;
                  if (kv_type == GGML_TYPE_F16) {
                      const ggml_fp16_t * k_f16 = (const ggml_fp16_t *)k_data;
 -                    for (int64_t dk = 0; dk < DK; dk++) {
@@ -173,7 +77,7 @@ diff --git a/ggml/src/ggml-cpu/ops.cpp b/ggml/src/ggml-cpu/ops.cpp
                      }
                  } else {
                      const float * k_f32_src = (const float *)k_data;
-@@ -9238,7 +9302,18 @@ static void ggml_compute_forward_flash_attn_ext_tiled(
+@@ -9137,7 +9180,18 @@ static void ggml_compute_forward_flash_attn_ext_tiled(
                  }
              }
              memset(KQ, 0, Q_TILE_SZ * KV_TILE_SZ * sizeof(float));
@@ -192,9 +96,9 @@ diff --git a/ggml/src/ggml-cpu/ops.cpp b/ggml/src/ggml-cpu/ops.cpp
              ggml_vec_scale_f32(Q_TILE_SZ * KV_TILE_SZ, KQ, scale);
  
              if (logit_softcap != 0.0f) {
-@@ -9291,7 +9366,15 @@ static void ggml_compute_forward_flash_attn_ext_tiled(
+@@ -9190,7 +9244,15 @@ static void ggml_compute_forward_flash_attn_ext_tiled(
              for (int tk = 0; tk < kv_tile; tk++) {
-                 const char * v_data = (const char *)v->data + (ic + tk)*nbv1 + iv2*nbv2 + iv3*nbv3;
+                 const char * v_data = (const char *)v->data + kv_row(ic + tk)*nbv1 + iv2*nbv2 + iv3*nbv3;
                  if (kv_type == GGML_TYPE_F16) {
 +#if GGML_USE_LLAMAFILE
 +                    // [jart] llamafile #975: route through optimized AVX-512
@@ -208,7 +112,7 @@ diff --git a/ggml/src/ggml-cpu/ops.cpp b/ggml/src/ggml-cpu/ops.cpp
                  } else {
                      memcpy(V32 + tk * DV, v_data, DV * sizeof(float));
                  }
-@@ -9301,7 +9384,16 @@ static void ggml_compute_forward_flash_attn_ext_tiled(
+@@ -9200,7 +9262,16 @@ static void ggml_compute_forward_flash_attn_ext_tiled(
                      memset(KQ + tq * KV_TILE_SZ, 0, KV_TILE_SZ * sizeof(float));
                  }
              }

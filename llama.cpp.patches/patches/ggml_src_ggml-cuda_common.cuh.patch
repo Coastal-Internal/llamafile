@@ -1,7 +1,7 @@
 diff --git a/ggml/src/ggml-cuda/common.cuh b/ggml/src/ggml-cuda/common.cuh
 --- a/llama.cpp/ggml/src/ggml-cuda/common.cuh
 +++ b/llama.cpp/ggml/src/ggml-cuda/common.cuh
-@@ -337,9 +337,15 @@ static bool fast_bf16_hardware_available(const int cc) {
+@@ -354,9 +354,15 @@ static bool fast_bf16_hardware_available(const int cc) {
  }
  
  static bool bf16_mma_hardware_available(const int cc) {
@@ -17,3 +17,21 @@ diff --git a/ggml/src/ggml-cuda/common.cuh b/ggml/src/ggml-cuda/common.cuh
  }
  
  static bool fp32_mma_hardware_available(const int cc) {
+@@ -1358,7 +1364,7 @@ struct ggml_backend_cuda_context {
+     cublasHandle_t cublas_handles[GGML_CUDA_MAX_DEVICES][GGML_CUDA_MAX_STREAMS] = {};
+     void * cublas_workspaces[GGML_CUDA_MAX_DEVICES][GGML_CUDA_MAX_STREAMS] = {};
+     size_t cublas_workspace_sizes[GGML_CUDA_MAX_DEVICES] = {};
+-#if !defined(GGML_USE_HIP) && !defined(GGML_USE_MUSA) && CUDART_VERSION >= 11080
++#if !defined(GGML_USE_HIP) && !defined(GGML_USE_MUSA) && CUDART_VERSION >= 11080 && !defined(GGML_USE_TINYBLAS)
+     cublasLtHandle_t cublaslt_handles[GGML_CUDA_MAX_DEVICES] = {};
+ #endif
+ 
+@@ -1423,7 +1429,7 @@ struct ggml_backend_cuda_context {
+         return cublas_handles[device][curr_stream_no];
+     }
+ 
+-#if !defined(GGML_USE_HIP) && !defined(GGML_USE_MUSA) && CUDART_VERSION >= 11080
++#if !defined(GGML_USE_HIP) && !defined(GGML_USE_MUSA) && CUDART_VERSION >= 11080 && !defined(GGML_USE_TINYBLAS)
+     cublasLtHandle_t cublaslt_handle() {
+         if (cublaslt_handles[device] == nullptr) {
+             ggml_cuda_set_device(device);
