@@ -1,6 +1,6 @@
 diff --git a/src/ggml_extend.hpp b/src/ggml_extend.hpp
---- a/stable-diffusion.cpp/src/ggml_extend.hpp
-+++ b/stable-diffusion.cpp/src/ggml_extend.hpp
+--- a/src/ggml_extend.hpp
++++ b/src/ggml_extend.hpp
 @@ -1012,13 +1012,13 @@ __STATIC_INLINE__ ggml_tensor* ggml_ext_linear(ggml_context* ctx,
          x           = ggml_reshape_2d(ctx, x, x->ne[0], x->ne[1] * x->ne[2] * x->ne[3]);
          x           = ggml_mul_mat(ctx, w, x);
