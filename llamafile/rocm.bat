@@ -143,7 +143,7 @@ set "COMMON_FLAGS=%COMMON_FLAGS% -DGGML_USE_HIP=1 -DGGML_USE_TINYBLAS=1 -DGGML_H
 :: sync with FA_TYPES / FA_DEFAULT_COMBINATIONS in llamafile/build-functions.sh.
 :: (The informational GGML_CUDA_FA_QUANTS string macro is #ifdef-guarded and is
 :: not set here, to avoid quoting it through cmd.)
-set "FA_TYPES=Q4_0 Q4_1 Q5_0 Q5_1 Q8_0 BF16 F16"
+set "FA_TYPES=Q4_0 Q4_1 Q5_0 Q5_1 Q8_0 BF16 F16 F8_E4M3"
 set "FA_COMBINATIONS=Q4_0-Q4_0 Q8_0-Q8_0 F16-F16 BF16-BF16"
 for %%v in (%FA_TYPES%) do for %%k in (%FA_TYPES%) do (
     set "FA_COMPILED=0"
