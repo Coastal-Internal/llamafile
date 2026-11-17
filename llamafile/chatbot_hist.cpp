@@ -99,8 +99,6 @@ std::string describe_token(int token) {
         return "§";
     if (token == llama_vocab_eos(vocab))
         return "∎";
-    if (token == llama_vocab_cls(vocab))
-        return "⌘";
     if (token == llama_vocab_sep(vocab))
         return "⋯";
     if (token == llama_vocab_pad(vocab))
