@@ -1,5 +1,5 @@
 # update LLAMAFILE_VERSION for a new release
-LLAMAFILE_VERSION="0.10.7"
+LLAMAFILE_VERSION="0.11.0"
 
 # this is where the precompiled GPU libraries are stored
 GPU_LIBS_DIR="/home/mala/gpulibs/${LLAMAFILE_VERSION}"
