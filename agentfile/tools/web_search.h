@@ -85,7 +85,7 @@ struct WebSearchTool : server_tool {
         };
     }
 
-    json invoke(json params, server_tool::stream *) const override {
+    json invoke(json params, server_tool::stream *, const std::function<bool()> &) const override {
         if (!params.contains("query")) {
             return {{"error", "missing required parameter: query"}};
         }
