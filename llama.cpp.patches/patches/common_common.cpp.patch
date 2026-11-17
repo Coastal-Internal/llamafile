@@ -52,16 +52,16 @@ diff --git a/common/common.cpp b/common/common.cpp
      int32_t logical_cpus = _system_configuration.ncpus;
      int32_t smt_threads = _system_configuration.smt_threads;
      if (smt_threads > 0) {
-@@ -1007,6 +1042,16 @@ std::filesystem::path fs_get_cache_directory() {
+@@ -987,6 +1022,16 @@ std::filesystem::path fs_get_cache_directory() {
      if (cache_directory.empty()) {
          throw std::runtime_error("Failed to find %LOCALAPPDATA% directory");
      }
 +#elif defined(COSMOCC)
 +    // We don't know what OS we are running on at compile time, just CPU
 +    // architecture. Try various environment variables, fall back to ~/.cache.
-+    cache_directory = common_get_path_from_env("LOCALAPPDATA");
++    cache_directory = common_get_env("LOCALAPPDATA");
 +    if (cache_directory.empty()) {
-+        cache_directory = common_get_path_from_env("XDG_CACHE_HOME");
++        cache_directory = common_get_env("XDG_CACHE_HOME");
 +    }
 +    if (cache_directory.empty()) {
 +        cache_directory = get_home_directory() / ".cache";
@@ -69,20 +69,20 @@ diff --git a/common/common.cpp b/common/common.cpp
  #elif defined(__APPLE__)
      cache_directory = get_home_directory() / "Library/Caches";
  #else
-@@ -1025,6 +1070,16 @@ std::filesystem::path fs_get_config_directory() {
+@@ -1005,6 +1050,16 @@ std::filesystem::path fs_get_config_directory() {
      if (config_directory.empty()) {
          throw std::runtime_error("Failed to find %APPDATA% directory");
      }
 +#elif defined(COSMOCC)
 +    // We don't know what OS we are running on at compile time, just CPU
 +    // architecture. Try various environment variables, fall back to ~/.config.
-+    config_directory = common_get_path_from_env("APPDATA");
++    config_directory = common_get_env("APPDATA");
 +    if (config_directory.empty()) {
-+        config_directory = common_get_path_from_env("XDG_CONFIG_HOME");
++        config_directory = common_get_env("XDG_CONFIG_HOME");
 +    }
 +    if (config_directory.empty()) {
 +        config_directory = get_home_directory() / ".config";
 +    }
  #else
-     config_directory = common_get_path_from_env("XDG_CONFIG_HOME");
+     config_directory = common_get_env("XDG_CONFIG_HOME");
      if (config_directory.empty()) {

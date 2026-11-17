@@ -36,7 +36,7 @@ diff --git a/tools/server/server-models.cpp b/tools/server/server-models.cpp
      }
  
      ~server_monitor() {
-@@ -947,13 +966,19 @@ void server_models::load_models() {
+@@ -967,13 +986,19 @@ void server_models::load_models() {
          }
  
          // wait for all targeted models to reach UNLOADED; cv.wait handles unlock/relock
@@ -58,7 +58,7 @@ diff --git a/tools/server/server-models.cpp b/tools/server/server-models.cpp
  
          // erase models no longer in any source
          for (auto it = mapping.begin(); it != mapping.end(); ) {
-@@ -1158,7 +1183,12 @@ void server_models::load(const std::string & name, const load_options & opts) {
+@@ -1178,7 +1203,12 @@ void server_models::load(const std::string & name, const load_options & opts) {
      std::unique_lock<std::mutex> lk(mutex);
      // edge case: block until any in-progress reload has finished so we always load
      // against the freshest preset and a consistent mapping state
@@ -72,7 +72,7 @@ diff --git a/tools/server/server-models.cpp b/tools/server/server-models.cpp
  
      // a download over an existing entry is decided under the lock, so a load of the
      // same model cannot start in between: a paused download or an idle cached model
-@@ -1381,7 +1411,10 @@ void server_models::unload_all() {
+@@ -1403,7 +1433,10 @@ void server_models::unload_all() {
          }
      }
      // wait for every child to exit, the monitor force-kills the ones that ignore the exit command
@@ -84,7 +84,7 @@ diff --git a/tools/server/server-models.cpp b/tools/server/server-models.cpp
          if (sched->is_measuring(lk)) {
              return false;
          }
-@@ -1391,7 +1424,10 @@ void server_models::unload_all() {
+@@ -1413,7 +1446,10 @@ void server_models::unload_all() {
              }
          }
          return true;
@@ -96,7 +96,7 @@ diff --git a/tools/server/server-models.cpp b/tools/server/server-models.cpp
  }
  
  void server_models::update_status(const std::string & name, const update_status_args & args) {
-@@ -1552,16 +1588,22 @@ void server_models::wait(const std::string & name, std::function<bool(const serv
+@@ -1583,16 +1619,22 @@ void server_models::wait(const std::string & name, std::function<bool(const serv
  }
  
  void server_models::wait(std::unique_lock<std::mutex> & lk, const std::string & name, std::function<bool(const server_model_meta &)> predicate) {
@@ -126,7 +126,7 @@ diff --git a/tools/server/server-models.cpp b/tools/server/server-models.cpp
  }
  
  bool server_models::ensure_model_ready(const std::string & name, const std::function<bool()> & should_stop) {
-@@ -2631,10 +2673,10 @@ server_http_proxy::server_http_proxy(
+@@ -2664,10 +2706,10 @@ server_http_proxy::server_http_proxy(
      auto pipe = std::make_shared<server_pipe<msg_t>>();
  
      if (scheme == "https") {

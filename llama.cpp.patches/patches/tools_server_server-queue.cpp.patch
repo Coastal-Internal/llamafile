@@ -15,7 +15,7 @@ diff --git a/tools/server/server-queue.cpp b/tools/server/server-queue.cpp
  
  #define QUE_INF(fmt, ...) LOG_INF("que  %12.*s: " fmt, 12, __func__, __VA_ARGS__)
  #define QUE_WRN(fmt, ...) LOG_WRN("que  %12.*s: " fmt, 12, __func__, __VA_ARGS__)
-@@ -123,9 +130,13 @@ void server_queue::wait_until_no_sleep() {
+@@ -121,9 +128,13 @@ void server_queue::wait_until_no_sleep() {
              condition_tasks.notify_one(); // only main thread is waiting on this
          }
          QUE_DBG("%s", "waiting until no sleep\n");
@@ -30,9 +30,9 @@ diff --git a/tools/server/server-queue.cpp b/tools/server/server-queue.cpp
 +            condition_tasks.wait_for(lock, std::chrono::seconds(30));
 +        }
      }
+     n_inflight++;
  }
- 
-@@ -165,9 +176,13 @@ void server_queue::worker_loop() {
+@@ -170,9 +181,13 @@ void server_queue::worker_loop() {
          {
              std::unique_lock<std::mutex> lock(mutex_tasks);
              // wait on busy instead of yielding - busy stays set even when the yield already ended
@@ -49,7 +49,7 @@ diff --git a/tools/server/server-queue.cpp b/tools/server/server-queue.cpp
              if (worker.stop) {
                  return;
              }
-@@ -192,9 +207,13 @@ void server_queue::worker_loop() {
+@@ -197,9 +212,13 @@ void server_queue::worker_loop() {
              if (!queue_tasks.empty()) {
                  continue; // a new task arrived in the meantime
              }
@@ -66,7 +66,7 @@ diff --git a/tools/server/server-queue.cpp b/tools/server/server-queue.cpp
          }
  
          // signal to yield_to_queue() that no more tasks will be processed
-@@ -220,6 +239,21 @@ void server_queue::worker_stop() {
+@@ -225,6 +244,21 @@ void server_queue::worker_stop() {
  }
  
  void server_queue::yield_to_queue(std::function<void()> && work) {
@@ -88,7 +88,7 @@ diff --git a/tools/server/server-queue.cpp b/tools/server/server-queue.cpp
      GGML_ASSERT(worker.thread.joinable() && "yield_to_queue() requires start_loop() to be running");
  
      QUE_DBG("%s", "yielding to queue\n");
-@@ -246,9 +280,13 @@ void server_queue::yield_to_queue(std::function<void()> && work) {
+@@ -251,9 +285,13 @@ void server_queue::yield_to_queue(std::function<void()> && work) {
          // the yield is over, wait for the worker to finish its current task
          worker.yielding = false;
          condition_tasks.notify_all();
@@ -105,7 +105,7 @@ diff --git a/tools/server/server-queue.cpp b/tools/server/server-queue.cpp
  
          // put the declined tasks back, keeping their order
          while (!queue_tasks_unhandled.empty()) {
-@@ -276,6 +314,21 @@ void server_queue::yield_to_queue(std::function<void()> && work) {
+@@ -281,6 +319,21 @@ void server_queue::yield_to_queue(std::function<void()> && work) {
  }
  
  void server_queue::start_loop(int64_t idle_sleep_ms) {
@@ -127,7 +127,7 @@ diff --git a/tools/server/server-queue.cpp b/tools/server/server-queue.cpp
      running = true;
      time_last_task = ggml_time_ms();
  
-@@ -333,9 +386,13 @@ void server_queue::start_loop(int64_t idle_sleep_ms) {
+@@ -338,9 +391,13 @@ void server_queue::start_loop(int64_t idle_sleep_ms) {
                  }
                  req_stop_sleeping = false;
                  // wait until we are requested to exit sleeping state
@@ -144,7 +144,7 @@ diff --git a/tools/server/server-queue.cpp b/tools/server/server-queue.cpp
                  if (!running) { // may changed during sleep
                      break; // terminate
                  }
-@@ -427,13 +484,17 @@ void server_response::remove_waiting_task_ids(const std::unordered_set<int> & id
+@@ -432,13 +489,17 @@ void server_response::remove_waiting_task_ids(const std::unordered_set<int> & id
  server_task_result_ptr server_response::recv(const std::unordered_set<int> & id_tasks) {
      while (true) {
          std::unique_lock<std::mutex> lock(mutex_results);

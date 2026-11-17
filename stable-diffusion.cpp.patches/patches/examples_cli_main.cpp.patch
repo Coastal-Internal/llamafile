@@ -1,7 +1,6 @@
 diff --git a/examples/cli/main.cpp b/examples/cli/main.cpp
-index dc5013b..926cd85 100644
---- a/examples/cli/main.cpp
-+++ b/examples/cli/main.cpp
+--- a/stable-diffusion.cpp/examples/cli/main.cpp
++++ b/stable-diffusion.cpp/examples/cli/main.cpp
 @@ -11,6 +11,11 @@
  #include <sstream>
  #include <string>

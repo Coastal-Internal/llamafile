@@ -31,9 +31,9 @@ diff --git a/ggml/src/ggml-backend-impl.h b/ggml/src/ggml-backend-impl.h
      };
  
      struct ggml_backend_buffer_type {
-@@ -48,26 +48,30 @@ extern "C" {
-     //
- 
+@@ -51,31 +51,35 @@ extern "C" {
+     //       they are superseded by the `set_tensor_n`, `get_tensor_n`, `cpy_tensor_n` interface
+     //       ref: https://github.com/ggml-org/llama.cpp/pull/30881#discussion_r4400299490
      struct ggml_backend_buffer_i {
 -        // (optional) free the buffer
 -        void         (*free_buffer)  (ggml_backend_buffer_t buffer);
@@ -67,6 +67,14 @@ diff --git a/ggml/src/ggml-backend-impl.h b/ggml/src/ggml-backend-impl.h
          // (optional) reset any internal state due to tensor initialization, such as tensor extras
 -        void         (*reset)        (ggml_backend_buffer_t buffer);
 +        void         (GGML_CALL *reset)        (ggml_backend_buffer_t buffer);
+         // (optional) batched tensor data copies
+-        void         (*set_tensor_n) (ggml_backend_buffer_t buffer,       struct ggml_tensor * const * tensors, const void * const * data, const size_t * offsets, const size_t * sizes, size_t n_tensors);
+-        void         (*get_tensor_n) (ggml_backend_buffer_t buffer, const struct ggml_tensor * const * tensors,       void * const * data, const size_t * offsets, const size_t * sizes, size_t n_tensors);
++        void         (GGML_CALL *set_tensor_n) (ggml_backend_buffer_t buffer,       struct ggml_tensor * const * tensors, const void * const * data, const size_t * offsets, const size_t * sizes, size_t n_tensors);
++        void         (GGML_CALL *get_tensor_n) (ggml_backend_buffer_t buffer, const struct ggml_tensor * const * tensors,       void * const * data, const size_t * offsets, const size_t * sizes, size_t n_tensors);
+         // (optional) batched tensor copies: returns true if all copies were performed, false if unsupported and no copies were performed
+-        bool         (*cpy_tensor_n) (ggml_backend_buffer_t buffer, const struct ggml_tensor * const * srcs, struct ggml_tensor * const * dsts, size_t n_tensors);
++        bool         (GGML_CALL *cpy_tensor_n) (ggml_backend_buffer_t buffer, const struct ggml_tensor * const * srcs, struct ggml_tensor * const * dsts, size_t n_tensors);
 +        // (optional) free the buffer struct itself - used for cross-module memory management
 +        // (eg. when buffer is allocated by a dynamically loaded library)
 +        // if NULL, the default 'delete buffer' is used
@@ -74,7 +82,7 @@ diff --git a/ggml/src/ggml-backend-impl.h b/ggml/src/ggml-backend-impl.h
      };
  
      struct ggml_backend_buffer {
-@@ -115,45 +119,45 @@ extern "C" {
+@@ -123,45 +127,45 @@ extern "C" {
      struct ggml_backend_graph_optimize_params {
          // keep `tensor` allocated at least until `until` (a node of the same graph) has been computed
          // can be called multiple times for the same tensor: the longest lifetime applies
@@ -137,7 +145,7 @@ diff --git a/ggml/src/ggml-backend-impl.h b/ggml/src/ggml-backend-impl.h
      };
  
      struct ggml_backend {
-@@ -176,46 +180,46 @@ extern "C" {
+@@ -184,46 +188,46 @@ extern "C" {
      //       the current functions to obtain the properties can remain, since they are more convenient for often used properties
      struct ggml_backend_device_i {
          // device name: short identifier for this device, such as "CPU" or "CUDA0"
@@ -199,7 +207,7 @@ diff --git a/ggml/src/ggml-backend-impl.h b/ggml/src/ggml-backend-impl.h
      };
  
      struct ggml_backend_device {
-@@ -229,15 +233,15 @@ extern "C" {
+@@ -237,15 +241,15 @@ extern "C" {
      //
  
      struct ggml_backend_reg_i {

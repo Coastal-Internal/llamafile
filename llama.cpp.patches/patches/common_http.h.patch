@@ -67,7 +67,7 @@ diff --git a/common/http.h b/common/http.h
      } else if (parts.scheme == "http") {
          parts.port = 80;
      } else if (parts.scheme == "https") {
-@@ -218,7 +228,7 @@ static std::pair<httplib::Client, common_http_url> common_http_client(const std:
+@@ -238,7 +248,7 @@ static std::pair<httplib::Client, common_http_url> common_http_client(const std:
          throw std::runtime_error("error: invalid URL format");
      }
  

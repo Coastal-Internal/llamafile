@@ -1,7 +1,7 @@
 diff --git a/common/common.h b/common/common.h
 --- a/llama.cpp/common/common.h
 +++ b/llama.cpp/common/common.h
-@@ -629,7 +629,7 @@ struct common_params {
+@@ -642,7 +642,7 @@ struct common_params {
      std::string cls_sep    = "\t";  // separator of classification sequences
  
      // server params
